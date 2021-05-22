@@ -5,15 +5,21 @@ import Home from "./components/pages/Home";
 import Login from "./components/pages/Login";
 import Posts from "./components/pages/Posts";
 import Register from "./components/pages/Register";
+import { AuthProvider } from "./context/auth";
+import MenuBar from "./components/pages/MenuBar";
+import AuthRoute from "./utils/AuthRoute";
 
 function App() {
   return (
-    <Router>
-      <Route exact path="/" component={Home} />
-      <Route exact path="/login" component={Login} />
-      <Route exact path="/register" component={Register} />
-      <Route exact path="/posts" component={Posts} />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <MenuBar />
+        <Route exact path="/" component={Home} />
+        <AuthRoute exact path="/login" component={Login} />
+        <AuthRoute exact path="/register" component={Register} />
+        <Route exact path="/posts" component={Posts} />
+      </Router>
+    </AuthProvider>
   );
 }
 

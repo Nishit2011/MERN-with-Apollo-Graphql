@@ -1,65 +1,67 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { CREATE_USER_MUTATION } from "../../graphql/mutation";
 import { useMutation } from "@apollo/client";
+import { useForm } from "../../utils/hooks";
+import { AuthContext } from "../../context/auth";
 
-const Register = () => {
-  const [formInput, setFormInput] = useState({
+const Register = (props) => {
+  const context = useContext(AuthContext);
+  const [errors, setErrors] = useState({});
+  const { onChange, onSubmit, values } = useForm(registerUser, {
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
-  const [register, { error }] = useMutation(CREATE_USER_MUTATION);
+  const [addUser, { loading }] = useMutation(CREATE_USER_MUTATION, {
+    update(proxy, { data: { register: userData } }) {
+      //   console.log(result);
+      context.login(userData);
+      props.history.push("/");
+    },
+    onError(err) {
+      setErrors(err.graphQLErrors[0].extensions.exception.errors);
+    },
+    variables: values,
+  });
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-    console.log(formInput);
-    register({
-      variables: {
-        username: formInput.username,
-        email: formInput.email,
-        password: formInput.password,
-        confirmPassword: formInput.confirmPassword,
-      },
-    });
-
-    if (error) {
-      console.log(error);
-    }
-  };
+  function registerUser() {
+    console.log(addUser);
+    addUser();
+  }
 
   return (
     <div>
       <h2>Register</h2>
-      <form onSubmit={(e) => handleRegister(e)}>
+      {/* {errors} */}
+      <form onSubmit={onSubmit}>
+        {errors.username}
         <input
           type="text"
           placeholder="Enter username"
-          onChange={(e) =>
-            setFormInput({ ...formInput, username: e.target.value })
-          }
+          name="username"
+          onChange={onChange}
         />
+        {errors.email}
         <input
           type="text"
           placeholder="Enter email"
-          onChange={(e) =>
-            setFormInput({ ...formInput, email: e.target.value })
-          }
+          name="email"
+          onChange={onChange}
         />
+        {errors.password}
         <input
           type="text"
           placeholder="Enter password"
-          onChange={(e) =>
-            setFormInput({ ...formInput, password: e.target.value })
-          }
+          name="password"
+          onChange={onChange}
         />
         <input
           type="text"
           placeholder="Enter confirmPassword"
-          onChange={(e) =>
-            setFormInput({ ...formInput, confirmPassword: e.target.value })
-          }
+          name="confirmPassword"
+          onChange={onChange}
         />
         <button>Register</button>
       </form>
